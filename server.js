@@ -1,4 +1,4 @@
-require('dotenv').config();  
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 
@@ -9,6 +9,7 @@ app.use(express.json());
 
 // Rutas
 app.use("/sessions", require("./Routes/sessions"));
+app.use("/login", require("./Routes/login"));
 
 // ⬇ Puerto dinámico de Railway ⬇
 const PORT = process.env.PORT || 3000;
