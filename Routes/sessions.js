@@ -14,7 +14,9 @@ router.get("/:id", async (req, res) => {
 
         console.log("📦 Resultado desde MySQL:", rows);
 
-        res.json(rows[0] || {});
+        res.setHeader("Content-Type", "application/json");
+        res.send(JSON.stringify(rows[0] || {}, null, 4));
+
     } catch (err) {
         console.error("❌ Error en DB:", err);
         res.status(500).json({ error: "Database error" });
