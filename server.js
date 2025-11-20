@@ -17,7 +17,8 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("API RUNNING ON PORT " + PORT);
     console.log("PORT env:", process.env.PORT);
+    console.log("¿Existe login?: ", require('fs').existsSync("./Routes/login.js"));
+    console.log("¿Existe sessions?: ", require('fs').existsSync("./Routes/sessions.js"));
 });
 
-console.log("¿Existe login?: ", require('fs').existsSync("./Routes/login.js"));
-console.log("¿Existe sessions?: ", require('fs').existsSync("./Routes/sessions.js"));
+
