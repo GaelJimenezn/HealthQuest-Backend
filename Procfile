@@ -1,1 +1,1 @@
-web: node HEALTHQUEST-BACKEND/server.js
+web: node server.js
