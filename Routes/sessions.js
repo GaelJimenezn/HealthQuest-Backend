@@ -1,59 +1,43 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const db = require("../db");
+const db = require('../db');
 
-// GET: Obtener sesión por ID
-router.get("/:id", async (req, res) => {
-    try {
-        const [rows] = await db.query(
-            "SELECT * FROM Sesiones WHERE id_sesion = ?",
-            [req.params.id]
-        );
-        res.json(rows[0] || {});
-    } catch (err) {
-        console.error("❌ Error en DB:", err);
-        res.status(500).json({ error: "Database error" });
-    }
-});
-
-// POST: Guardar nueva sesión (LO QUE FALTABA)
+// POST: Guardar configuración simple (Sin puntaje)
 router.post("/", async (req, res) => {
-    console.log("📥 Guardando sesión:", req.body);
-
-    // Extraemos los datos que envía Unity
     const {
         paciente_id,
-        puntuacion_total,
-        rango_maximo_alcanzado,
-        duracion_sesion,
-        velocidad_enemigos_sesion,
-        ejercicio
+        duracion,
+        enemigos,
+        cadencia,
+        velocidad
     } = req.body;
 
+    if (!paciente_id) {
+        return res.status(400).json({ error: "Falta paciente_id" });
+    }
+
+    console.log(`📝 Guardando Configuración para Paciente ${paciente_id}`);
+
     try {
-        // NOTA: NO incluimos 'id_sesion' aquí, es AUTO_INCREMENT
         const query = `
-            INSERT INTO Sesiones 
-            (paciente_id, puntuacion_total, rango_maximo_alcanzado, duracion_sesion, velocidad_enemigos_sesion, ejercicio, fecha_ini)
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO Sesiones_Simple 
+            (paciente_id, duracion, total_enemigos, cadencia, velocidad)
+            VALUES (?, ?, ?, ?, ?)
         `;
 
-        // Ejecutamos la query
-        const [result] = await db.query(query, [
+        await db.query(query, [
             paciente_id,
-            puntuacion_total,
-            rango_maximo_alcanzado,
-            duracion_sesion,
-            velocidad_enemigos_sesion,
-            ejercicio || "General" // Valor por defecto si viene vacío
+            duracion,
+            enemigos,
+            cadencia,
+            velocidad
         ]);
 
-        console.log("✅ Sesión guardada con ID:", result.insertId);
-        res.json({ success: true, id_sesion: result.insertId });
+        res.json({ success: true, message: "Configuración guardada correctamente." });
 
-    } catch (err) {
-        console.error("❌ Error al insertar:", err);
-        res.status(500).json({ success: false, error: err.message });
+    } catch (error) {
+        console.error("❌ Error SQL:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
