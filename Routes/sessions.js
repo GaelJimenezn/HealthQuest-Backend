@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db'); // Asegúrate de que db.js apunte a tu base de datos correcta
+const db = require('../db');
 
-// POST: Crear una nueva configuración de sesión
+// 1. POST: Crear la sesión inicial (Configuración)
 router.post("/", async (req, res) => {
-    // Extraemos los datos que envía Unity (SimpleSessionData)
     const {
         paciente_id,
         duracion,
@@ -13,36 +12,71 @@ router.post("/", async (req, res) => {
         velocidad
     } = req.body;
 
-    console.log("📦 Recibido POST /sessions:", req.body);
-
-    // Validación simple
     if (!paciente_id) {
-        return res.status(400).json({ success: false, error: "Falta paciente_id" });
+        return res.status(400).json({ error: "Falta paciente_id" });
     }
 
+    console.log(`📝 Creando sesión para Paciente ${paciente_id}`);
+
     try {
-        // NOTA: Cambia 'Sesiones_Simple' por el nombre real de tu tabla nueva si es diferente.
-        // Asegúrate que las columnas coincidan con las de tu tabla.
         const query = `
             INSERT INTO Sesiones_Simple 
-            (paciente_id, duracion, total_enemigos, cadencia, velocidad)
-            VALUES (?, ?, ?, ?, ?)
+            (paciente_id, duracion, total_enemigos, cadencia, velocidad, fecha_registro)
+            VALUES (?, ?, ?, ?, ?, NOW())
         `;
 
-        // Ejecutar query con los valores. Si velocidad viene vacía, usamos 5.0 por defecto.
         const [result] = await db.query(query, [
             paciente_id,
             duracion,
             enemigos,
             cadencia,
-            velocidad || 5.0
+            velocidad
         ]);
 
-        console.log("✅ Insertado ID:", result.insertId);
-        res.json({ success: true, id: result.insertId, message: "Configuración guardada." });
+        // Devolvemos el ID de la sesión creada para que Unity lo guarde
+        res.json({ success: true, id: result.insertId, message: "Sesión creada." });
 
     } catch (error) {
-        console.error("❌ Error SQL:", error);
+        console.error("❌ Error SQL POST:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ---------------------------------------------------------
+// 2. PUT: Actualizar resultados al finalizar (ESTO ES LO QUE TE FALTA)
+// ---------------------------------------------------------
+router.put("/:id", async (req, res) => {
+    const { id } = req.params; // El ID de la sesión (ej: 55)
+    const {
+        puntaje_izquierdo,
+        puntaje_derecho,
+        precision
+    } = req.body;
+
+    console.log(`[API] Guardando resultados para Sesión ID: ${id}`);
+
+    try {
+        const query = `
+            UPDATE Sesiones_Simple 
+            SET puntaje_izquierdo = ?, puntaje_derecho = ?, \`precision\` = ?
+            WHERE sesion_id = ?
+        `;
+
+        const [result] = await db.query(query, [
+            puntaje_izquierdo,
+            puntaje_derecho,
+            precision,
+            id
+        ]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Sesión no encontrada en BD" });
+        }
+
+        res.json({ success: true, message: "Resultados guardados correctamente" });
+
+    } catch (error) {
+        console.error("❌ Error SQL PUT:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
