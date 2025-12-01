@@ -2,21 +2,25 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-// LOGIN sin hash (solo pruebas)
-router.post("/", async (req, res) => {
+// LOGIN sin hash (adaptado a Callbacks)
+router.post("/", (req, res) => {
     const { email, password } = req.body;
 
-    try {
-        const [rows] = await db.query(
-            "SELECT * FROM Usuarios WHERE email = ?",
-            [email]
-        );
+    const query = "SELECT * FROM Usuarios WHERE email = ?";
 
-        if (rows.length === 0) {
+    // CAMBIO CRÍTICO: Usamos callback (err, results) en lugar de await
+    db.query(query, [email], (err, results) => {
+        if (err) {
+            console.error("Error en login:", err);
+            return res.status(500).json({ success: false, error: "Error en servidor" });
+        }
+
+        // En modo callback, 'results' es el array de filas directo
+        if (results.length === 0) {
             return res.status(400).json({ success: false, error: "Usuario no encontrado" });
         }
 
-        const user = rows[0];
+        const user = results[0];
 
         // Comparación SIMPLE (solo pruebas)
         if (password !== user.password_hash) {
@@ -29,11 +33,7 @@ router.post("/", async (req, res) => {
             user_id: user.id_usuario,
             email: user.email
         });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, error: "Error en servidor" });
-    }
+    });
 });
 
 module.exports = router;
