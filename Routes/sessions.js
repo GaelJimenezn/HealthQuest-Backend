@@ -1,30 +1,37 @@
-const express = require('express');
-const router = express.Router();
-const db = require('../db');
+// routes/sessions.js (o tu archivo controlador)
 
-// POST /sessions
-// Crea la sesión inicial en la tabla correcta
-router.post('/', async (req, res) => {
-    const { paciente_id, duracion, enemigos, cadencia, velocidad } = req.body;
-    console.log(`[API] Creando Sesión para Paciente ID: ${paciente_id}`);
+router.post('/', (req, res) => {
+    // 1. Recibimos los datos tal cual los envía Unity (clase SimpleSessionData)
+    const {
+        paciente_id,
+        duracion,   // En C# es 'duracion'
+        enemigos,   // En C# es 'enemigos'
+        cadencia,
+        velocidad
+    } = req.body;
 
-    try {
-        // ⚠️ CAMBIO AQUÍ: Nombre de la tabla actualizado a 'sesiones_simple'
-        // Verifica que las columnas (paciente_id, fecha, etc.) existan en esa tabla también.
-        const query = `
-            INSERT INTO Sesiones_Simple 
-            (paciente_id, fecha, duracion_configurada, total_enemigos, cadencia_configurada, velocidad_configurada)
-            VALUES (?, NOW(), ?, ?, ?, ?)
-        `;
+    // 2. Preparamos la consulta SQL
+    // NOTA: Mapeamos 'enemigos' (del JSON) a 'total_enemigos' (de la Tabla)
+    // NOTA: Usamos 'duracion' que es el nombre correcto en tu tabla
+    const query = `
+        INSERT INTO sessions 
+        (paciente_id, duracion, total_enemigos, cadencia, velocidad, fecha) 
+        VALUES (?, ?, ?, ?, ?, NOW())
+    `;
 
-        const [result] = await db.query(query, [paciente_id, duracion, enemigos, cadencia, velocidad]);
+    // 3. Ejecutamos la consulta
+    db.query(query, [paciente_id, duracion, enemigos, cadencia, velocidad], (err, result) => {
+        if (err) {
+            console.error("Error al insertar sesión:", err);
+            // Devolvemos error 500 con detalle para debug
+            return res.status(500).json({ error: err.message });
+        }
 
-        res.json({ success: true, id: result.insertId });
-
-    } catch (error) {
-        console.error("Error en POST /sessions:", error);
-        res.status(500).json({ error: error.message });
-    }
+        // 4. Devolvemos el ID generado para que Unity lo use luego en el PUT
+        res.status(200).json({
+            success: true,
+            id: result.insertId,
+            message: "Sesión configurada correctamente"
+        });
+    });
 });
-
-module.exports = router;
