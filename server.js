@@ -1,25 +1,35 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Rutas
-app.use("/sessions", require("./Routes/sessions"));
-app.use("/login", require("./Routes/login"));
-app.use("/pacientes", require("./Routes/pacientes"));
+// --- RUTAS ---
+const rutas = [
+    "/sessions",
+    "/resultados",
+    "/login",
+    "/pacientes"
+];
+
+rutas.forEach(ruta => {
+    app.use(ruta, require(`./Routes${ruta}`));
+});
+
 // ⬇ Puerto dinámico de Railway ⬇
 const PORT = process.env.PORT || 3000;
 
+// Log único verificando que todos los archivos existen
+const rutasCargadas = rutas.every(ruta =>
+    fs.existsSync(`./Routes${ruta}.js`)
+);
+
+console.log("Rutas cargadas correctamente:", rutasCargadas ? "✔️" : "❌", rutas);
+
 app.listen(PORT, () => {
     console.log("API RUNNING ON PORT " + PORT);
-    console.log("PORT env:", process.env.PORT);
-    console.log("¿Existe login?: ", require('fs').existsSync("./Routes/login.js"));
-    console.log("¿Existe sessions?: ", require('fs').existsSync("./Routes/sessions.js"));
-    console.log("¿Existe pacientes?: ", require('fs').existsSync("./Routes/pacientes.js"));
 });
-
-
