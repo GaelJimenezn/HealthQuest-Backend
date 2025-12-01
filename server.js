@@ -8,13 +8,12 @@ app.use(cors());
 app.use(express.json());
 
 // --- RUTAS ---
-// Verifica que tengas estas 4 líneas activas
 app.use("/login", require("./Routes/login"));
 app.use("/pacientes", require("./Routes/pacientes"));
 app.use("/sessions", require("./Routes/sessions"));      // Inicio del juego (POST)
 app.use("/resultados", require("./Routes/resultados"));  // Fin del juego (PUT)
 
-// ⬇ Puerto dinámico de Railway ⬇
+// ⬇ Puerto dinámico
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

@@ -1,7 +1,6 @@
 // db.js
 require('dotenv').config();
 
-// CAMBIO IMPORTANTE: Quitamos "/promise" para usar callbacks clásicos
 const mysql = require("mysql2");
 
 const pool = mysql.createPool({
@@ -15,5 +14,4 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Exportamos el pool directamente
 module.exports = pool;
