@@ -16,7 +16,7 @@ router.post('/', (req, res) => {
     console.log("Recibida petición de sesión:", req.body);
 
     const query = `
-        INSERT INTO sessions 
+        INSERT INTO Sesiones_Simple 
         (paciente_id, duracion, total_enemigos, cadencia, velocidad, fecha) 
         VALUES (?, ?, ?, ?, ?, NOW())
     `;
