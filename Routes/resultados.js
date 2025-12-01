@@ -2,33 +2,26 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// PUT /resultados/:id
-router.put('/:id', async (req, res) => {
-    const { id } = req.params;
+// URL final: https://.../resultados/:id
+router.put('/:id', (req, res) => {
+    const sessionId = req.params.id;
     const { puntaje_izquierdo, puntaje_derecho, precision } = req.body;
 
-    console.log(`[API] Guardando Resultados en Sesión ID: ${id}`);
+    console.log(`Guardando resultados para sesión ${sessionId}`, req.body);
 
-    try {
-        // ⚠️ CAMBIO AQUÍ: Nombre de la tabla actualizado a 'sesiones_simple'
-        const query = `
-            UPDATE Sesiones_Simple 
-            SET puntaje_izquierdo = ?, puntaje_derecho = ?, precision_total = ?
-            WHERE sesion_id = ?
-        `;
+    const query = `
+        UPDATE sessions 
+        SET puntaje_izquierdo = ?, puntaje_derecho = ?, precision = ?
+        WHERE id = ?
+    `;
 
-        const [result] = await db.query(query, [puntaje_izquierdo, puntaje_derecho, precision, id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "Sesión no encontrada o ID inválido" });
+    db.query(query, [puntaje_izquierdo, puntaje_derecho, precision, sessionId], (err, result) => {
+        if (err) {
+            console.error("Error actualizando resultados:", err);
+            return res.status(500).json({ error: err.message });
         }
-
-        res.json({ success: true, message: "Guardado con éxito" });
-
-    } catch (error) {
-        console.error("Error en PUT /resultados:", error);
-        res.status(500).json({ error: error.message });
-    }
+        res.status(200).json({ success: true, message: "Resultados guardados" });
+    });
 });
 
 module.exports = router;

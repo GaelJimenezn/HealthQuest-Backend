@@ -1,7 +1,8 @@
 // db.js
-require('dotenv').config(); // para uso local
+require('dotenv').config();
 
-const mysql = require("mysql2/promise");
+// CAMBIO IMPORTANTE: Quitamos "/promise" para usar callbacks clásicos
+const mysql = require("mysql2");
 
 const pool = mysql.createPool({
     host: process.env.MYSQLHOST || "localhost",
@@ -9,7 +10,10 @@ const pool = mysql.createPool({
     user: process.env.MYSQLUSER || "root",
     password: process.env.MYSQLPASSWORD || "",
     database: process.env.MYSQLDATABASE || "HealthQuest",
-    connectionLimit: 10
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
+// Exportamos el pool directamente
 module.exports = pool;
