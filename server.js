@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
 
 const app = express();
 
@@ -9,27 +8,15 @@ app.use(cors());
 app.use(express.json());
 
 // --- RUTAS ---
-const rutas = [
-    "/sessions",
-    "/resultados",
-    "/login",
-    "/pacientes"
-];
-
-rutas.forEach(ruta => {
-    app.use(ruta, require(`./Routes${ruta}`));
-});
+app.use("/sessions", require("./Routes/sessions"));     // Solo para CREAR (Inicio)
+app.use("/resultados", require("./Routes/resultados")); // Solo para ACTUALIZAR (Fin)
+app.use("/login", require("./Routes/login"));
+app.use("/pacientes", require("./Routes/pacientes"));
 
 // ⬇ Puerto dinámico de Railway ⬇
 const PORT = process.env.PORT || 3000;
 
-// Log único verificando que todos los archivos existen
-const rutasCargadas = rutas.every(ruta =>
-    fs.existsSync(`./Routes${ruta}.js`)
-);
-
-console.log("Rutas cargadas correctamente:", rutasCargadas ? "✔️" : "❌", rutas);
-
 app.listen(PORT, () => {
     console.log("API RUNNING ON PORT " + PORT);
+    console.log("Ruta de Resultados cargada: ", require('fs').existsSync("./Routes/resultados.js"));
 });
