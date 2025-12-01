@@ -10,7 +10,7 @@ router.put('/:id', (req, res) => {
     console.log(`[API] Guardando resultados Sesión ${sessionId}:`, req.body);
 
     const query = `
-        UPDATE sessions 
+        UPDATE Sesiones_Simple  
         SET puntaje_izquierdo = ?, puntaje_derecho = ?, \`precision\` = ?
         WHERE id = ?
     `;
