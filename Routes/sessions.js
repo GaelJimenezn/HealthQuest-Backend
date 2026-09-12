@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// POST /sessions
+// Creates a new game session with its initial configuration.
 router.post('/', (req, res) => {
     const {
         paciente_id,
@@ -13,6 +15,7 @@ router.post('/', (req, res) => {
 
     console.log("Recibida petición de sesión:", req.body);
 
+    // Store the session configuration in MySQL.
     const query = `
         INSERT INTO Sesiones_Simple 
         (paciente_id, duracion, total_enemigos, cadencia, velocidad, fecha) 
@@ -35,7 +38,5 @@ router.post('/', (req, res) => {
     });
 });
 
-// NOTA: La ruta PUT de resultados se maneja en 'Routes/resultados.js'
-// No la pongas aquí para evitar duplicados y errores de ruta.
-
+// Session results are updated through Routes/resultados.js.
 module.exports = router;
