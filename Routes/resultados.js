@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// PUT /resultados/:id
+// Actualiza las métricas obtenidas durante una sesión de rehabilitación.
 router.put('/:id', (req, res) => {
     const sessionId = req.params.id;
 
@@ -9,6 +11,7 @@ router.put('/:id', (req, res) => {
 
     console.log(`[API] Guardando resultados Sesión ${sessionId}:`, req.body);
 
+    // Actualiza únicamente la sesión indicada por su ID.
     const query = `
         UPDATE Sesiones_Simple  
         SET puntaje_izquierdo = ?, puntaje_derecho = ?, \`precision\` = ?
@@ -21,6 +24,7 @@ router.put('/:id', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
 
+        // Si no se modificó ninguna fila, la sesión solicitada no existe.
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: "No se encontró la sesión con ese ID" });
         }
